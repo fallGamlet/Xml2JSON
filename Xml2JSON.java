@@ -8,9 +8,16 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class Xml2JSON {
+    public static final String NODE_FILED_ATTR = "attr";
     public static final String NODE_FILED_NAME = "name";
     public static final String NODE_FILED_CONTENT = "content";
-    
+
+    /**
+     * Get JSON object from Xml Node (use recursion)
+     * @param node Src Xml Node
+     * @return JSONObject if OK and null if can't parse. JSON object has fields: attr - attribures of node; name - name of tag, content - include values (may be String, JSONArray, JSONObject or NULL)
+     * @throws JSONException
+     */
     public static JSONObject getJSON(Node node) throws JSONException {
         if (node == null) { return null; }
         int type = node.getNodeType();
@@ -18,7 +25,7 @@ public class Xml2JSON {
         int nodeType = Node.ELEMENT_NODE;
 
         JSONObject jsonObject = new JSONObject();
-        jsonObject.putOpt("name", node.getNodeName());
+        jsonObject.putOpt(NODE_FILED_NAME, node.getNodeName());
 
         if (node.hasAttributes()) {
             JSONObject jsonAttr = new JSONObject();
@@ -30,7 +37,7 @@ public class Xml2JSON {
                 String value = attrItem.getNodeValue();
                 jsonAttr.putOpt(name, value);
             }
-            jsonObject.putOpt("attr", jsonAttr);
+            jsonObject.putOpt(NODE_FILED_ATTR, jsonAttr);
         }
 
         if (node.hasChildNodes()) {
@@ -41,7 +48,7 @@ public class Xml2JSON {
                 Node item = children.item(0);
                 int itemType = item.getNodeType();
                 if (itemType == Node.TEXT_NODE) {
-                    jsonObject.putOpt("content", item.getNodeValue());
+                    jsonObject.putOpt(NODE_FILED_CONTENT, item.getNodeValue());
                     return jsonObject;
                 }
             }
@@ -78,6 +85,12 @@ public class Xml2JSON {
         return jsonObject;
     }
 
+    /**
+     * Get object from src JSON by 'name' field
+     * @param src Source JSONObject
+     * @param name name of object's tag
+     * @return Founded object or null if not found
+     */
     public static Object searchItem(JSONObject src, String name) {
         if (src == null) { return null; }
         String curName = src.optString(NODE_FILED_NAME, null);
