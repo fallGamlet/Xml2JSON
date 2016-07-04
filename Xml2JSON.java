@@ -10,6 +10,7 @@ import org.xml.sax.SAXException;
 public class Xml2JSON {
     public static final String NODE_FILED_NAME = "name";
     public static final String NODE_FILED_CONTENT = "content";
+    
     public static JSONObject getJSON(Node node) throws JSONException {
         if (node == null) { return null; }
         int type = node.getNodeType();
