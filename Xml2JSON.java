@@ -191,52 +191,8 @@ public class Xml2JSON {
         return null;
     }
 
-    private static Object searchItem(JSONObject src, String filedName, String fieldValue) {
-        if (src == null) {
-            return null;
-        }
-
-        //        String curName = src.optString(NODE_FILED_NAME, null);
-//        if (curName != null) {
-//            if (curName == name || curName.equalsIgnoreCase(name)) {
-//                return src;
-//            }
-//        }
-//
-//        ArrayList<String> keyList = new ArrayList<>();
-//        Iterator<String> keys = src.keys();
-//        if (keys == null || !keys.hasNext()) { return null; }
-//        while (keys.hasNext()) {
-//            keyList.add(keys.next());
-//        }
-//
-//        for (String key : keyList) {
-//            if (key == name || (key != null && key.equalsIgnoreCase(name))) {
-//                return src.opt(key);
-//            }
-//        }
-//
-//        for (String key : keyList) {
-//            Object oItem = src.opt(key);
-//            if (oItem instanceof JSONObject) {
-//                return searchItemWithName((JSONObject)oItem, name);
-//            } else if (oItem instanceof JSONArray) {
-//                JSONArray arr = (JSONArray) oItem;
-//                int count = arr.length();
-//                for (int i=0; i<count; i++) {
-//                    Object arrItem = arr.opt(i);
-//                    if (arrItem instanceof JSONObject) {
-//                        Object resultObj = searchItemWithName((JSONObject)arrItem, name);
-//                        if (resultObj != null) { return resultObj; }
-//                    }
-//                }
-//            }
-//        }
-        return null;
-    }
-
     /**
-     * Simple convert JSON object to XML string without attributes. Every key it is tag,every value of key is content
+     * Simple convert JSON object to XML string without attributes. Every key it is tag,every value of key is content (recursive)
      * @param jObj Src JSON object? must have value types only one of String, JSONObject, JSONArray
      * @return String with xml text
     */
@@ -285,11 +241,11 @@ public class Xml2JSON {
         return builder.toString();
     }
 
-//    /**
-//     * Make JSON object shorter with remove subfiled if subfield value is not JSONObject or JSONArray and remove attributes (attr)
-//     * @param src Source for making short
-//     * @return shorted JSON or null
-//     */
+    /**
+     * Make JSON object shorter with remove subfiled if subfield value is not JSONObject or JSONArray and remove attributes (attr)
+     * @param src Source for making short
+     * @return shorted JSON or null
+     */
     public static Object makeShortWithoutAttr(Object src) throws JSONException {
         if (src == null) { return null; }
         if (src instanceof JSONObject) {
@@ -306,7 +262,7 @@ public class Xml2JSON {
                     String key = keys.next();
                     Object item = jSrc.opt(key);
                     if (item != null) {
-                        Object shortedItem = makeShort(item);
+                        Object shortedItem = makeShortWithoutAttr(item);
                         jRes.putOpt(key, shortedItem);
                     }
                 }
@@ -314,7 +270,7 @@ public class Xml2JSON {
             }
 
             if (content == null) { return null; }
-            Object shortedItem = makeShort(content);
+            Object shortedItem = makeShortWithoutAttr(content);
             if (shortedItem == null) { return null; }
             return shortedItem;
 
@@ -326,70 +282,7 @@ public class Xml2JSON {
             for (int i=0; i<count; i++) {
                 Object oItem = jarrSrc.opt(i);
                 if (oItem != null) {
-                    Object shortedItem = makeShort(oItem);
-                    if (shortedItem != null) { jarrRes.put(shortedItem); }
-                }
-            }
-            return jarrRes;
-        }
-        return src;
-    }
-
-    public static Object makeShort(Object src) throws JSONException {
-        if (src == null) { return null; }
-        if (src instanceof JSONObject) {
-            JSONObject jSrc = (JSONObject) src;
-            String name = jSrc.optString(NODE_FILED_NAME, null);
-//            Object attr = jSrc.opt(NODE_FILED_ATTR);
-            Object content = jSrc.opt(NODE_FILED_CONTENT);
-
-            if (name == null) {
-                Iterator<String> keys = jSrc.keys();
-                if (!keys.hasNext()) { return null; }
-
-                JSONObject jRes = new JSONObject();
-                while (keys.hasNext()) {
-                    String key = keys.next();
-                    Object item = jSrc.opt(key);
-                    if (item != null) {
-                        Object shortedItem = makeShort(item);
-                        jRes.putOpt(key, shortedItem);
-                    }
-                }
-                return jRes;
-            }
-
-//            if (attr != null) {
-//                JSONObject jRes = new JSONObject();
-//                jRes.putOpt(NODE_FILED_NAME, name);
-//                jRes.putOpt(NODE_FILED_ATTR, attr);
-//                if (content != null) {
-//                    Object shortedItem = makeShort(content);
-//                    if (shortedItem != null) { jRes.putOpt(NODE_FILED_CONTENT, shortedItem); }
-//                }
-//                return jRes;
-//            }
-
-            if (content == null) { return null; }
-            Object shortedItem = makeShort(content);
-            if (shortedItem == null) { return null; }
-//            if (shortedItem instanceof JSONObject || shortedItem instanceof JSONArray) {
-//                JSONObject jRes = new JSONObject();
-//                jRes.putOpt(NODE_FILED_NAME, name);
-//                jRes.putOpt(NODE_FILED_CONTENT, shortedItem);
-//                return jRes;
-//            }
-            return shortedItem;
-
-        } else if (src instanceof JSONArray) {
-            JSONArray jarrSrc = (JSONArray) src;
-            int count = jarrSrc.length();
-            if (count == 0) { return null; }
-            JSONArray jarrRes = new JSONArray();
-            for (int i=0; i<count; i++) {
-                Object oItem = jarrSrc.opt(i);
-                if (oItem != null) {
-                    Object shortedItem = makeShort(oItem);
+                    Object shortedItem = makeShortWithoutAttr(oItem);
                     if (shortedItem != null) { jarrRes.put(shortedItem); }
                 }
             }
